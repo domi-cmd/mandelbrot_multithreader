@@ -4,7 +4,6 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-
 public class ColorPalette {
     private Color[][] colors; // palettes
     private int currentPalette = 0; // current palette
