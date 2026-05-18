@@ -7,7 +7,7 @@ import javax.swing.*;
 
 public class ColorPalette {
     private Color[][] colors; // palettes
-    private int currentPalette = 4; // current palette
+    private int currentPalette = 0; // current palette
     private static final int[][][] colpal = { // palette colors
         { {12, 0, 10, 20}, {12, 50, 100, 240}, {12, 20, 3, 26}, {12, 230, 60, 20},
             {12, 25, 10, 9}, {12, 230, 170, 0}, {12, 20, 40, 10}, {12, 0, 100, 0},

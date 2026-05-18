@@ -4,20 +4,23 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+import miniproject.mandelbrot_multithreader.gui.MandelDisplay;
 import miniproject.mandelbrot_multithreader.util.ColorPalette;
 
-public class MandelBrot extends JPanel {
+public class MandelBrot {
     static JFrame frame;
     static JButton b, b1;
     static JLabel label;
     static JPanel display;
 
+    private MandelDisplay mandelDisplay;
+
     private Image image; // offscreen image for double buffering
     private Graphics graphics; // offscreen graphics for the offscreen image
     
     // Display size
-    static int width;
-    static int height;
+    static int width = 800;
+    static int height = 600;
 
     // currently visible relative window dimensions
     private double viewX = 0.0;
@@ -36,26 +39,9 @@ public class MandelBrot extends JPanel {
     static int maxIterations = 20;
     
     public static void main(String[] args){
-        frame = new JFrame("Mandelbrot");
-
-        /**
-        display = new JPanel();
-        display.setBackground(Color.black);
-
-
-        frame.add(display);
-        frame.setSize(300, 300);
-        frame.setVisible(true); **/
-
         MandelBrot mandelBrot = new MandelBrot();
-        mandelBrot.setPreferredSize(new Dimension(800, 600));
+        mandelBrot.init(new MandelDisplay());
 
-        frame.add(mandelBrot);
-        frame.pack();
-        frame.setVisible(true);
-        
-        mandelBrot.init();
-        //mandelBrot.run();
         new Thread(mandelBrot::run).start();
     }
 
@@ -93,7 +79,7 @@ public class MandelBrot extends JPanel {
         //}
     }
 
-    public void init() {
+    public void init(MandelDisplay display) {
         /**
         addMouseListener(this);
         addMouseMotionListener(this);
@@ -101,17 +87,19 @@ public class MandelBrot extends JPanel {
         **/
         // initialize color palettes
         colorPalette = new ColorPalette();
+        mandelDisplay = display;
         //thread = null;
     }
 
     private boolean draw() {
         
-        Dimension size = getSize();
+        Dimension size = mandelDisplay.getSize();
         // create offscreen buffer for double buffering
         if (image == null || size.width != width || size.height != height) {
             width = size.width;
             height = size.height;
-            this.image = createImage(width, height);
+            this.image = mandelDisplay.createImage(width, height);
+            mandelDisplay.setImage(this.image);
             graphics = this.image.getGraphics();
         }
 
@@ -159,7 +147,7 @@ public class MandelBrot extends JPanel {
                 graphics.fillRect(x, y - rows[row][2] / 2, 1, rows[row][2]);
             }
             }
-            repaint();
+            mandelDisplay.repaint();
         }
         return false;
     }
@@ -203,13 +191,5 @@ public class MandelBrot extends JPanel {
         // transition smoothing
         zM2 += 0.000000001;
         return 256 * count + (int)(255.0 * Math.log(4 / zM2) / Math.log((zRe2 + zIm2) / zM2));
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        if (image != null) {
-            g.drawImage(image, 0, 0, null);
-        }
     }
 }
