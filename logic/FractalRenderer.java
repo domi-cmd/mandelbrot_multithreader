@@ -22,6 +22,11 @@ public class FractalRenderer {
     private double viewX = 0.0;
     private double viewY = 0.0;
     private double zoom = 1.0;
+    /**
+    private double viewX = -2.0;   // Start at the far left of the Mandelbrot
+    private double viewY = 1.25;   // Start at the top of the Mandelbrot
+    private double zoom = 3.0;
+    **/
 
     private static final int[][] rows = {
         {0, 16, 8}, {8, 16, 8}, {4, 16, 4}, {12, 16, 4},
@@ -37,7 +42,8 @@ public class FractalRenderer {
 
     public synchronized void redraw() {
         cancelled = true;
-        notifyAll(); // wakes the waiting render thread
+        dirty = true;
+        notifyAll();
     }
 
     public FractalRenderer(MandelDisplay mandelDisplay){
@@ -48,10 +54,13 @@ public class FractalRenderer {
 
     public void run() {
         while (true) {
+            cancelled = false;
             draw();
             synchronized (this) {
-                try { wait(); }
-                catch (InterruptedException e) { break; }
+                if (!dirty) {
+                    try { wait(); }
+                    catch (InterruptedException e) { break; }
+                }
             }
         }
     }
@@ -60,40 +69,34 @@ public class FractalRenderer {
         
         Dimension size = mandelDisplay.getSize();
         // create offscreen buffer for double buffering
-        if (image == null || size.width != width || size.height != height) {
+        if (image == null || size.width != width || size.height != height || dirty) {
             width = size.width;
             height = size.height;
             this.image = mandelDisplay.createImage(width, height);
             mandelDisplay.setImage(this.image);
             graphics = this.image.getGraphics();
+            dirty = false; 
         }
-
-        /**
-        // fractal image pre-drawing
-        for (int y = 0; y < height + 4; y += 8) {
-            if (Thread.interrupted())
-            return true;
-            for (int x = 0; x < width + 4; x += 8) {
-            double r = zoom / Math.min(width, height);
-            double dx = 2.5 * (x * r + viewX) - 2;
-            double dy = 1.25 - 2.5 * (y * r + viewY);
-            Color color = color(dx, dy);
-            graphics.setColor(color);
-            graphics.fillRect(x - 4, y - 4, 8, 8);
-            }
-        }
-        repaint();
-        **/
 
         // fractal image drawing
         for (int row = 0; row < rows.length; row++) {
             for (int y = rows[row][0]; y < height; y += rows[row][1]) {
-            if (Thread.interrupted())
+            if (cancelled || Thread.interrupted()) 
                 return true;
             for (int x = 0; x < width; x++) {
                 double r = zoom / Math.min(width, height);
                 double dx = 2.5 * (x * r + viewX) - 2;
                 double dy = 1.25 - 2.5 * (y * r + viewY);
+                
+                /**
+                // How much the complex plane changes per screen pixel
+                double r = zoom / width; 
+
+                // Simple linear mapping: start at viewX and add the pixel offset
+                double dx = viewX + x * r;
+                // Invert Y so that screen 0 is at the top (positive imaginary plane)
+                double dy = viewY - y * r;
+                **/
 
                 // Calculate and render the color of the pixel
                 Color color = renderColor(dx, dy);
@@ -139,6 +142,8 @@ public class FractalRenderer {
 
 
     public synchronized void zoomToRect(Point p1, Point p2) {
+        maxIterations = (int)(200 + Math.log10(3.0 / zoom) * 150);
+
         int x = Math.min(p1.x, p2.x);
         int y = Math.min(p1.y, p2.y);
         int w = Math.abs(p2.x - p1.x);
