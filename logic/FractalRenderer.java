@@ -11,11 +11,6 @@ public class FractalRenderer {
     private ColorPalette colorPalette;
     private MandelDisplay mandelDisplay;
 
-    static JFrame frame;
-    static JButton b, b1;
-    static JLabel label;
-    static JPanel display;
-
     private Image image; // offscreen image for double buffering
     private Graphics graphics; // offscreen graphics for the offscreen image
     
@@ -37,6 +32,14 @@ public class FractalRenderer {
 
     static int maxIterations = 20;
 
+    private volatile boolean cancelled = false;
+    private volatile boolean dirty = true; // force redraw on first draw too
+
+    public synchronized void redraw() {
+        cancelled = true;
+        notifyAll(); // wakes the waiting render thread
+    }
+
     public FractalRenderer(MandelDisplay mandelDisplay){
         this.mandelDisplay = mandelDisplay;
         this.colorPalette = new ColorPalette();
@@ -44,15 +47,13 @@ public class FractalRenderer {
 
 
     public void run() {
-        //while (thread != null) {
-            while (draw());
+        while (true) {
+            draw();
             synchronized (this) {
-                try {
-                    wait();
-                }
-                catch (InterruptedException e) {}
+                try { wait(); }
+                catch (InterruptedException e) { break; }
             }
-        //}
+        }
     }
 
     private boolean draw() {
@@ -134,5 +135,29 @@ public class FractalRenderer {
             int blue = (k1 * color.getBlue() + k2 * color2.getBlue()) / 255;
             color = new Color(red, green, blue);
         } **/
+    }
+
+
+    public synchronized void zoomToRect(Point p1, Point p2) {
+        int x = Math.min(p1.x, p2.x);
+        int y = Math.min(p1.y, p2.y);
+        int w = Math.abs(p2.x - p1.x);
+        int h = Math.abs(p2.y - p1.y);
+
+        if (w < 4 || h < 4) return;
+
+        double r = zoom / Math.min(width, height);
+
+        // convert top-left corner of selection to fractal coordinates
+        double newX = x * r + viewX;
+        double newY = y * r + viewY;
+
+        // shrink zoom by the fraction the rectangle is of the window
+        zoom *= (double) w / width;
+
+        viewX = newX;
+        viewY = newY;
+
+        redraw();
     }
 }
