@@ -2,6 +2,7 @@ package miniproject.mandelbrot_multithreader.gui;
 
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 
 import miniproject.mandelbrot_multithreader.logic.FractalRenderer;
 
@@ -13,12 +14,15 @@ public class MandelDisplay extends JPanel {
     static JLabel label;
     static JPanel display;
 
+    private JLabel timeLabel;
+    private JLabel iterLabel;
+
     private Point dragStart = null;
     private Point dragEnd = null;
 
     private FractalRenderer renderer;
 
-    private Image image; // offscreen image for double buffering
+    private java.awt.image.BufferedImage image;
 
 
     public MandelDisplay(int width, int height){
@@ -26,9 +30,16 @@ public class MandelDisplay extends JPanel {
 
         setPreferredSize(new Dimension(width, height));
 
-        frame.add(this);
+        JPanel inputPanel = setupInputPanel();
+
+        // 4. Mount everything cleanly to the Frame using explicit regions
+        frame.add(this, BorderLayout.CENTER);       // Fractal takes up the remaining core window
+        frame.add(inputPanel, BorderLayout.EAST);   // Button panel stays strictly on the right side
+
         frame.pack();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // Center the frame
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
         // Logic for allowing zoom via mouse
@@ -61,8 +72,125 @@ public class MandelDisplay extends JPanel {
         this.renderer = renderer;
     }
 
-    public void setImage(Image image) {
+    public void setImage(java.awt.image.BufferedImage image) {
         this.image = image;
+    }
+
+    // thread-safe helper method so the Renderer can push updates to the UI
+    public void updateRenderTime(long milliseconds) {
+        // Swing components must be updated on the Swing Event Dispatch Thread (EDT)
+        SwingUtilities.invokeLater(() -> {
+            timeLabel.setText("Render time: " + milliseconds + " ms");
+        });
+    }
+
+    // Public helper to update the iteration text dynamically from the renderer
+    public void updateIterationDisplay(int currentIterations) {
+        SwingUtilities.invokeLater(() -> {
+            iterLabel.setText("Iterations: " + currentIterations);
+        });
+    }
+
+
+    private JPanel setupInputPanel(){
+        JPanel inputPanel = new JPanel();
+        inputPanel.setLayout(new BoxLayout(inputPanel, BoxLayout.Y_AXIS));
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        inputPanel.setBackground(Color.DARK_GRAY);
+
+        // --- Reset Button ---
+        JButton resetBtn = new JButton("Reset Zoom");
+        resetBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // --- Change Palette Button ---
+        JButton paletteBtn = new JButton("Change Palette");
+        paletteBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        paletteBtn.addActionListener(e -> {
+            if (renderer != null) {
+                renderer.cycleColorPalette();
+            }
+        });
+        
+        // --- Thread Selection ---
+        JLabel threadLabel = new JLabel("Threads to use:");
+        threadLabel.setForeground(Color.WHITE);
+        threadLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        Integer[] threadOptions = { 1, 2, 4, 8, 12, 16 };
+        JComboBox<Integer> threadBox = new JComboBox<>(threadOptions);
+        threadBox.setSelectedItem(4); 
+        threadBox.setMaximumSize(new Dimension(150, 30));
+        threadBox.setAlignmentX(Component.CENTER_ALIGNMENT);
+        threadBox.addActionListener(e -> {
+            if (renderer != null) {
+                renderer.setThreadCount((Integer) threadBox.getSelectedItem());
+            }
+        });
+
+        // --- Iteration Control Controls ---
+        JLabel iterTitleLabel = new JLabel("Detail Level:");
+        iterTitleLabel.setForeground(Color.WHITE);
+        iterTitleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Displays current iteration depth status
+        iterLabel = new JLabel("Iterations: 20");
+        iterLabel.setForeground(Color.YELLOW); // Distinct color
+        iterLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Panel to hold plus and minus buttons side-by-side
+        JPanel iterButtonPanel = new JPanel(new GridLayout(1, 2, 10, 0));
+        iterButtonPanel.setMaximumSize(new Dimension(150, 30));
+        iterButtonPanel.setOpaque(false); // Translucent container background
+
+        JButton minusBtn = new JButton("-");
+        JButton plusBtn = new JButton("+");
+
+        // Connect the button click directly to the renderer's new reset method
+        resetBtn.addActionListener(e -> {
+            if (renderer != null) {
+                renderer.resetView();
+            }
+        });
+
+        minusBtn.addActionListener(e -> {
+            if (renderer != null) {
+                renderer.changeIterations(-50); // Drop iteration details
+            }
+        });
+
+        plusBtn.addActionListener(e -> {
+            if (renderer != null) {
+                renderer.changeIterations(50); // Push iteration details higher
+            }
+        });
+
+        iterButtonPanel.add(minusBtn);
+        iterButtonPanel.add(plusBtn);
+
+        // --- Performance Timing Label ---
+        timeLabel = new JLabel("Render time: 0 ms");
+        timeLabel.setForeground(Color.WHITE);
+        timeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Stack everything cleanly down the right-hand panel
+        inputPanel.add(resetBtn);
+        inputPanel.add(Box.createVerticalStrut(10)); // Gap between window control buttons
+        inputPanel.add(paletteBtn);               // Add the palette button here!
+        inputPanel.add(Box.createVerticalStrut(20));
+        inputPanel.add(threadLabel);
+        inputPanel.add(Box.createVerticalStrut(5));
+        inputPanel.add(threadBox);
+        inputPanel.add(Box.createVerticalStrut(20));
+        inputPanel.add(iterTitleLabel);
+        inputPanel.add(Box.createVerticalStrut(2));
+        inputPanel.add(iterLabel);
+        inputPanel.add(Box.createVerticalStrut(5));
+        inputPanel.add(iterButtonPanel); // Add the button row container
+        inputPanel.add(Box.createVerticalStrut(25));
+        inputPanel.add(timeLabel);
+
+
+        return inputPanel;
     }
 
 

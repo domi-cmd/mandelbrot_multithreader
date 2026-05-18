@@ -56,4 +56,11 @@ public class ColorPalette {
         } **/
         return color;
     }
+
+    /**
+     * Cycles to the next available color palette and wraps around if at the end.
+     */
+    public void cyclePalette() {
+        currentPalette = (currentPalette + 1) % colors.length;
+    }
 }
