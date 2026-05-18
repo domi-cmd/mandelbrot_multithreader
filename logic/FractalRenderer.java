@@ -20,8 +20,8 @@ public class FractalRenderer {
     private Graphics graphics; // offscreen graphics for the offscreen image
     
     // Display size
-    static int width = 800;
-    static int height = 600;
+    private int width;
+    private int height;
 
     // currently visible relative window dimensions
     private double viewX = 0.0;
@@ -93,7 +93,9 @@ public class FractalRenderer {
                 double r = zoom / Math.min(width, height);
                 double dx = 2.5 * (x * r + viewX) - 2;
                 double dy = 1.25 - 2.5 * (y * r + viewY);
-                Color color = color(dx, dy);
+
+                // Calculate and render the color of the pixel
+                Color color = renderColor(dx, dy);
                 
                 /**
                 // computation of average color for antialiasing
@@ -118,8 +120,7 @@ public class FractalRenderer {
 
 
     // Computes a color for a given point
-    private Color color(double x, double y) {
-        //int count = mandel(0.0, 0.0, x, y);
+    private Color renderColor(double x, double y) {
         int count = MandelMath.calculateFractalPixel(0.0, 0.0, x, y, maxIterations);
      
         return colorPalette.getColor(count);

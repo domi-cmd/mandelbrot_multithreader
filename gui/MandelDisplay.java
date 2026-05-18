@@ -1,7 +1,6 @@
 package miniproject.mandelbrot_multithreader.gui;
 
 import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
 
 public class MandelDisplay extends JPanel {
@@ -11,18 +10,9 @@ public class MandelDisplay extends JPanel {
     static JPanel display;
 
     private Image image; // offscreen image for double buffering
-    
-    // Display size
-    static int width = 800;
-    static int height = 600;
-
-    // currently visible relative window dimensions
-    private double viewX = 0.0;
-    private double viewY = 0.0;
-    private double zoom = 1.0;
 
 
-    public MandelDisplay(){
+    public MandelDisplay(int width, int height){
         frame = new JFrame("Mandelbrot Displayer");
 
         setPreferredSize(new Dimension(width, height));
