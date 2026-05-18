@@ -29,9 +29,11 @@ public class MandelDisplay extends JPanel {
 
         JPanel inputPanel = setupInputPanel();
 
-        // 4. Mount everything cleanly to the Frame using explicit regions
-        frame.add(this, BorderLayout.CENTER);       // Fractal takes up the remaining core window
-        frame.add(inputPanel, BorderLayout.EAST);   // Button panel stays strictly on the right side
+        // Mount everything to the Frame using explicit regions
+        // Fractal takes up the remaining core window
+        frame.add(this, BorderLayout.CENTER);       
+        // Button panel stays strictly on the right side
+        frame.add(inputPanel, BorderLayout.EAST);   
 
         frame.pack();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -57,10 +59,12 @@ public class MandelDisplay extends JPanel {
             int w = Math.abs(dragEnd.x - dragStart.x);
             int h = Math.abs(dragEnd.y - dragStart.y);
 
-            g.setColor(new Color(255, 255, 255, 60));  // translucent fill
+            // translucent fill
+            g.setColor(new Color(255, 255, 255, 60));  
             g.fillRect(x, y, w, h);
 
-            g.setColor(Color.WHITE);  // border
+             // border
+            g.setColor(Color.WHITE); 
             g.drawRect(x, y, w, h);
         }
     }
@@ -131,13 +135,14 @@ public class MandelDisplay extends JPanel {
 
         // Displays current iteration depth status
         iterLabel = new JLabel("Iterations: 20");
-        iterLabel.setForeground(Color.YELLOW); // Distinct color
+        iterLabel.setForeground(Color.YELLOW);
         iterLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // Panel to hold plus and minus buttons side-by-side
         JPanel iterButtonPanel = new JPanel(new GridLayout(1, 2, 10, 0));
         iterButtonPanel.setMaximumSize(new Dimension(150, 30));
-        iterButtonPanel.setOpaque(false); // Translucent container background
+        // Translucent container background
+        iterButtonPanel.setOpaque(false); 
 
         JButton minusBtn = new JButton("-");
         JButton plusBtn = new JButton("+");
@@ -151,13 +156,15 @@ public class MandelDisplay extends JPanel {
 
         minusBtn.addActionListener(e -> {
             if (renderer != null) {
-                renderer.changeIterations(-50); // Drop iteration details
+                // Drop iteration details
+                renderer.changeIterations(-50); 
             }
         });
 
         plusBtn.addActionListener(e -> {
             if (renderer != null) {
-                renderer.changeIterations(50); // Push iteration details higher
+                // Push iteration details higher
+                renderer.changeIterations(50); 
             }
         });
 
@@ -171,8 +178,8 @@ public class MandelDisplay extends JPanel {
 
         // Stack everything cleanly down the right-hand panel
         inputPanel.add(resetBtn);
-        inputPanel.add(Box.createVerticalStrut(10)); // Gap between window control buttons
-        inputPanel.add(paletteBtn);               // Add the palette button here!
+        inputPanel.add(Box.createVerticalStrut(10));
+        inputPanel.add(paletteBtn);             
         inputPanel.add(Box.createVerticalStrut(20));
         inputPanel.add(threadLabel);
         inputPanel.add(Box.createVerticalStrut(5));
@@ -182,10 +189,9 @@ public class MandelDisplay extends JPanel {
         inputPanel.add(Box.createVerticalStrut(2));
         inputPanel.add(iterLabel);
         inputPanel.add(Box.createVerticalStrut(5));
-        inputPanel.add(iterButtonPanel); // Add the button row container
+        inputPanel.add(iterButtonPanel); 
         inputPanel.add(Box.createVerticalStrut(25));
         inputPanel.add(timeLabel);
-
 
         return inputPanel;
     }
@@ -215,7 +221,8 @@ public class MandelDisplay extends JPanel {
             @Override
             public void mouseDragged(MouseEvent e) {
                 dragEnd = e.getPoint();
-                repaint(); // redraws fractal + rectangle overlay
+                // redraws fractal + rectangle overlay
+                repaint(); 
             }
         });
     }

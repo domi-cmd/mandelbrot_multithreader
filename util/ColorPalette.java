@@ -3,9 +3,12 @@ package miniproject.mandelbrot_multithreader.util;
 import java.awt.*;
 
 public class ColorPalette {
-    private Color[][] colors; // palettes
-    private int currentPalette = 0; // current palette
-    private static final int[][][] colpal = { // palette colors
+    // palettes
+    private Color[][] colors; 
+    // current palette
+    private int currentPalette = 0; 
+    // palette colors
+    private static final int[][][] colpal = { 
         { {12, 0, 10, 20}, {12, 50, 100, 240}, {12, 20, 3, 26}, {12, 230, 60, 20},
             {12, 25, 10, 9}, {12, 230, 170, 0}, {12, 20, 40, 10}, {12, 0, 100, 0},
             {12, 5, 10, 10}, {12, 210, 70, 30}, {12, 90, 0, 50}, {12, 180, 90, 120},
@@ -18,21 +21,28 @@ public class ColorPalette {
 
     public ColorPalette(){
         colors = new Color[colpal.length][];
-        for (int p = 0; p < colpal.length; p++) { // process all palettes
+        // process all palettes
+        for (int p = 0; p < colpal.length; p++) { 
             int n = 0;
-            for (int i = 0; i < colpal[p].length; i++) // get the number of all colors
+            // get the number of all colors
+            for (int i = 0; i < colpal[p].length; i++) 
             n += colpal[p][i][0];
-            colors[p] = new Color[n]; // allocate pallete
+            // allocate pallete
+            colors[p] = new Color[n]; 
             n = 0;
-            for (int i = 0; i < colpal[p].length; i++) { // interpolate all colors
-            int[] c1 = colpal[p][i]; // first referential color
-            int[] c2 = colpal[p][(i + 1) % colpal[p].length]; // second ref. color
-            for (int j = 0; j < c1[0]; j++) // linear interpolation of RGB values
-                colors[p][n + j] = new Color(
-                    (c1[1] * (c1[0] - 1 - j) + c2[1] * j) / (c1[0] - 1),
-                    (c1[2] * (c1[0] - 1 - j) + c2[2] * j) / (c1[0] - 1),
-                    (c1[3] * (c1[0] - 1 - j) + c2[3] * j) / (c1[0] - 1));
-            n += c1[0];
+            // interpolate all colors
+            for (int i = 0; i < colpal[p].length; i++) { 
+                // first referential color
+                int[] c1 = colpal[p][i]; 
+                // second ref. color
+                int[] c2 = colpal[p][(i + 1) % colpal[p].length]; 
+                // linear interpolation of RGB values
+                for (int j = 0; j < c1[0]; j++) 
+                    colors[p][n + j] = new Color(
+                        (c1[1] * (c1[0] - 1 - j) + c2[1] * j) / (c1[0] - 1),
+                        (c1[2] * (c1[0] - 1 - j) + c2[2] * j) / (c1[0] - 1),
+                        (c1[3] * (c1[0] - 1 - j) + c2[3] * j) / (c1[0] - 1));
+                n += c1[0];
             }
         }
     }
@@ -42,16 +52,7 @@ public class ColorPalette {
     public Color getColor(int count) {
         int palSize = colors[currentPalette].length;
         Color color = colors[currentPalette][count / 256 % palSize];
-        /**
-        if (smooth) {
-            Color color2 = colors[currentPalette][(count / 256 + palSize - 1) % palSize];
-            int k1 = count % 256;
-            int k2 = 255 - k1;
-            int red = (k1 * color.getRed() + k2 * color2.getRed()) / 255;
-            int green = (k1 * color.getGreen() + k2 * color2.getGreen()) / 255;
-            int blue = (k1 * color.getBlue() + k2 * color2.getBlue()) / 255;
-            color = new Color(red, green, blue);
-        } **/
+
         return color;
     }
 

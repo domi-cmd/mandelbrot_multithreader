@@ -2,6 +2,7 @@ package miniproject.mandelbrot_multithreader.logic;
 
 public class MandelMath {
     // Computes a value for a given complex number
+    // Formula is from the given template
     public static int calculateFractalPixel(double zRe, double zIm, double pRe, double pIm, int maxIterations) {
         double zRe2 = zRe * zRe;
         double zIm2 = zIm * zIm;
