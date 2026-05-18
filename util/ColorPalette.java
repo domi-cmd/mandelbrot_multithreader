@@ -1,8 +1,6 @@
 package miniproject.mandelbrot_multithreader.util;
 
 import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
 
 public class ColorPalette {
     private Color[][] colors; // palettes

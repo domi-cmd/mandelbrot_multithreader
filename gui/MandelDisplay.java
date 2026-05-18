@@ -2,10 +2,7 @@ package miniproject.mandelbrot_multithreader.gui;
 
 import java.awt.*;
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-
 import miniproject.mandelbrot_multithreader.logic.FractalRenderer;
-
 import java.awt.event.*; 
 
 public class MandelDisplay extends JPanel {
